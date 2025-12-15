@@ -51,10 +51,11 @@ This is an AI-powered customer support email automation system for InfinityWork 
 /
 ├── main.py              # FastAPI application entry point
 ├── database.py          # SQLAlchemy database configuration
-├── models.py            # Database models (Ticket, EmailConfig)
+├── models.py            # Database models (Ticket, EmailConfig, SchedulerConfig)
 ├── ai_processor.py      # OpenAI integration with MASTER PROMPT
 ├── email_ingestor.py    # IMAP email fetching service
 ├── mail_sender.py       # SMTP email sending service
+├── scheduler.py         # APScheduler background job for auto-fetching
 ├── templates/           # Jinja2 HTML templates
 │   ├── base.html
 │   ├── dashboard.html
@@ -71,10 +72,12 @@ This is an AI-powered customer support email automation system for InfinityWork 
 3. **Human Approval**: Web dashboard for reviewing and approving AI-generated responses
 4. **Response Sending**: Sends approved responses via SMTP only after explicit approval
 5. **Ticket Tracking**: Full ticket lifecycle management (new → analyzed → pending → approved/rejected → sent)
+6. **Auto-Fetch Scheduler**: Background scheduler that automatically fetches emails at configurable intervals (1-60 minutes)
 
 ## Database Schema
 - **tickets**: Stores all support tickets with email content, AI analysis, approval status
 - **email_config**: Stores IMAP/SMTP configuration
+- **scheduler_config**: Stores auto-fetch scheduler settings
 
 ## Ticket Statuses
 - `new`: Just created, not yet analyzed
