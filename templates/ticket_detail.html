@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ticket.ticket_id }} - InfinityWork Support Desk{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/" class="text-indigo-600 hover:text-indigo-800">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">{{ ticket.ticket_id }}</h1>
+                    <p class="text-gray-600 mt-1">{{ ticket.email_subject }}</p>
+                </div>
+                <div class="flex space-x-2">
+                    {% if ticket.urgency %}
+                    <span class="px-3 py-1 text-sm rounded-full urgency-{{ ticket.urgency|lower }}">
+                        {{ ticket.urgency }} Urgency
+                    </span>
+                    {% endif %}
+                    <span class="px-3 py-1 text-sm rounded-full status-{{ ticket.status }}">
+                        {{ ticket.status | replace('_', ' ') | title }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="border-t pt-4">
+                <h3 class="font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-envelope mr-2 text-indigo-600"></i>Original Email
+                </h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="text-sm text-gray-500 mb-2">
+                        <strong>From:</strong> {{ ticket.sender_name or '' }} &lt;{{ ticket.sender_email }}&gt;<br>
+                        <strong>Date:</strong> {{ ticket.received_at.strftime('%Y-%m-%d %H:%M') if ticket.received_at else 'N/A' }}
+                    </div>
+                    <div class="text-gray-800 whitespace-pre-wrap">{{ ticket.email_body }}</div>
+                </div>
+            </div>
+        </div>
+        
+        {% if ticket.ai_response %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">
+                <i class="fas fa-robot mr-2 text-indigo-600"></i>AI Analysis & Suggested Response
+            </h3>
+            
+            {% if ticket.summary %}
+            <div class="mb-4">
+                <label class="text-sm text-gray-500 font-medium">Summary</label>
+                <p class="text-gray-800 mt-1">{{ ticket.summary }}</p>
+            </div>
+            {% endif %}
+            
+            {% if ticket.fix_steps %}
+            <div class="mb-4">
+                <label class="text-sm text-gray-500 font-medium">Suggested Troubleshooting Steps</label>
+                <div class="bg-blue-50 rounded-lg p-4 mt-1 text-gray-800 whitespace-pre-wrap">{{ ticket.fix_steps }}</div>
+            </div>
+            {% endif %}
+            
+            <div class="mb-4">
+                <label class="text-sm text-gray-500 font-medium">AI-Generated Response</label>
+                <div class="bg-green-50 rounded-lg p-4 mt-1 text-gray-800 whitespace-pre-wrap">{{ ticket.ai_response }}</div>
+            </div>
+            
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><strong>Confidence:</strong> {{ ticket.confidence or 'N/A' }}</span>
+                {% if ticket.escalation_required %}
+                <span class="text-red-600"><i class="fas fa-exclamation-triangle mr-1"></i>Escalation Recommended</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if ticket.status == 'pending_approval' %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">
+                <i class="fas fa-check-circle mr-2 text-green-600"></i>Approval Actions
+            </h3>
+            
+            <form action="/ticket/{{ ticket.ticket_id }}/approve" method="POST" class="mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Response to Send (editable)</label>
+                    <textarea name="response_text" rows="8" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">{{ ticket.ai_response }}</textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
+                    <input type="text" name="approved_by" value="Admin" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fas fa-check mr-2"></i>Approve Response
+                </button>
+            </form>
+            
+            <div class="border-t pt-4">
+                <form action="/ticket/{{ ticket.ticket_id }}/reject" method="POST">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason (optional)</label>
+                        <textarea name="rejection_reason" rows="2" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+                    </div>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition">
+                        <i class="fas fa-times mr-2"></i>Reject Response
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if ticket.status == 'approved' %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">
+                <i class="fas fa-paper-plane mr-2 text-indigo-600"></i>Send Approved Response
+            </h3>
+            
+            <div class="bg-green-50 rounded-lg p-4 mb-4">
+                <label class="text-sm text-gray-500 font-medium">Approved Response</label>
+                <div class="text-gray-800 whitespace-pre-wrap mt-2">{{ ticket.approved_response }}</div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-4">
+                Approved by <strong>{{ ticket.approved_by }}</strong> on 
+                {{ ticket.approved_at.strftime('%Y-%m-%d %H:%M') if ticket.approved_at else 'N/A' }}
+            </p>
+            
+            <form action="/ticket/{{ ticket.ticket_id }}/send" method="POST">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Email to Customer
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        {% if ticket.status == 'sent' %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center text-green-600 mb-4">
+                <i class="fas fa-check-circle text-3xl mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-lg">Response Sent Successfully</h3>
+                    <p class="text-sm text-gray-500">Sent on {{ ticket.sent_at.strftime('%Y-%m-%d %H:%M') if ticket.sent_at else 'N/A' }}</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4">
+                <label class="text-sm text-gray-500 font-medium">Sent Response</label>
+                <div class="text-gray-800 whitespace-pre-wrap mt-2">{{ ticket.approved_response }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if ticket.status == 'rejected' %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center text-red-600 mb-4">
+                <i class="fas fa-times-circle text-3xl mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-lg">Response Rejected</h3>
+                </div>
+            </div>
+            
+            {% if ticket.rejected_reason %}
+            <div class="bg-red-50 rounded-lg p-4">
+                <label class="text-sm text-gray-500 font-medium">Rejection Reason</label>
+                <div class="text-gray-800 mt-2">{{ ticket.rejected_reason }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">
+                <i class="fas fa-info-circle mr-2 text-indigo-600"></i>Ticket Details
+            </h3>
+            
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm text-gray-500">Category</dt>
+                    <dd class="font-medium">{{ ticket.category or 'Not Classified' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Urgency</dt>
+                    <dd>
+                        {% if ticket.urgency %}
+                        <span class="px-2 py-1 text-xs rounded-full urgency-{{ ticket.urgency|lower }}">{{ ticket.urgency }}</span>
+                        {% else %}
+                        <span class="text-gray-400">Not Set</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Status</dt>
+                    <dd>
+                        <span class="px-2 py-1 text-xs rounded-full status-{{ ticket.status }}">
+                            {{ ticket.status | replace('_', ' ') | title }}
+                        </span>
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Confidence</dt>
+                    <dd class="font-medium">{{ ticket.confidence or 'N/A' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Escalation Required</dt>
+                    <dd class="font-medium">
+                        {% if ticket.escalation_required %}
+                        <span class="text-red-600"><i class="fas fa-exclamation-triangle mr-1"></i>Yes</span>
+                        {% else %}
+                        <span class="text-green-600">No</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Created</dt>
+                    <dd class="font-medium">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'N/A' }}</dd>
+                </div>
+            </dl>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">
+                <i class="fas fa-user mr-2 text-indigo-600"></i>Customer Info
+            </h3>
+            
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm text-gray-500">Name</dt>
+                    <dd class="font-medium">{{ ticket.sender_name or 'Unknown' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Email</dt>
+                    <dd class="font-medium text-indigo-600">{{ ticket.sender_email }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

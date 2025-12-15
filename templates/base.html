@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InfinityWork Support Desk{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .status-new { background-color: #e5e7eb; color: #374151; }
+        .status-analyzed { background-color: #dbeafe; color: #1e40af; }
+        .status-pending_approval { background-color: #fef3c7; color: #92400e; }
+        .status-approved { background-color: #d1fae5; color: #065f46; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
+        .status-sent { background-color: #c7d2fe; color: #3730a3; }
+        
+        .urgency-low { background-color: #d1fae5; color: #065f46; }
+        .urgency-medium { background-color: #fef3c7; color: #92400e; }
+        .urgency-high { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-xl font-bold">
+                        <i class="fas fa-headset mr-2"></i>InfinityWork Support Desk
+                    </a>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="hover:text-indigo-200 transition">
+                        <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                    </a>
+                    <a href="/test-ticket" class="hover:text-indigo-200 transition">
+                        <i class="fas fa-plus-circle mr-1"></i> Test Ticket
+                    </a>
+                    <a href="/settings" class="hover:text-indigo-200 transition">
+                        <i class="fas fa-cog mr-1"></i> Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="bg-gray-800 text-gray-400 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2024 InfinityWork IT Solutions (Pty) Ltd. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

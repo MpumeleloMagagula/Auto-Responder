@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - InfinityWork Support Desk{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Email Settings</h1>
+    <p class="text-gray-600">Configure your IMAP and SMTP settings for email integration</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <form action="/settings/email" method="POST">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                    <i class="fas fa-inbox mr-2 text-indigo-600"></i>IMAP Settings (Incoming)
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">IMAP Server</label>
+                        <input type="text" name="imap_server" value="{{ config.imap_server if config else '' }}" 
+                            placeholder="imap.gmail.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">IMAP Port</label>
+                        <input type="number" name="imap_port" value="{{ config.imap_port if config else 993 }}" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">IMAP Username</label>
+                        <input type="text" name="imap_username" value="{{ config.imap_username if config else '' }}" 
+                            placeholder="your-email@gmail.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">IMAP Password</label>
+                        <input type="password" name="imap_password" value="{{ config.imap_password if config else '' }}" 
+                            placeholder="App password or regular password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                    <i class="fas fa-paper-plane mr-2 text-indigo-600"></i>SMTP Settings (Outgoing)
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Server</label>
+                        <input type="text" name="smtp_server" value="{{ config.smtp_server if config else '' }}" 
+                            placeholder="smtp.gmail.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                        <input type="number" name="smtp_port" value="{{ config.smtp_port if config else 587 }}" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Username</label>
+                        <input type="text" name="smtp_username" value="{{ config.smtp_username if config else '' }}" 
+                            placeholder="your-email@gmail.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Password</label>
+                        <input type="password" name="smtp_password" value="{{ config.smtp_password if config else '' }}" 
+                            placeholder="App password or regular password"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 border-t pt-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-id-card mr-2 text-indigo-600"></i>Sender Identity
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">From Email</label>
+                    <input type="email" name="from_email" value="{{ config.from_email if config else '' }}" 
+                        placeholder="support@infinitywork.co.za"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">From Name</label>
+                    <input type="text" name="from_name" value="{{ config.from_name if config else 'InfinityWork Support Team' }}" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition">
+                <i class="fas fa-save mr-2"></i>Save Settings
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-yellow-800 mb-2">
+        <i class="fas fa-lightbulb mr-2"></i>Tips for Gmail Users
+    </h3>
+    <ul class="text-yellow-700 space-y-2 text-sm">
+        <li><i class="fas fa-check mr-2"></i>Use <strong>imap.gmail.com</strong> for IMAP server and <strong>smtp.gmail.com</strong> for SMTP server</li>
+        <li><i class="fas fa-check mr-2"></i>Enable IMAP in your Gmail settings (Settings > Forwarding and POP/IMAP)</li>
+        <li><i class="fas fa-check mr-2"></i>Use an <strong>App Password</strong> instead of your regular password (required for 2FA accounts)</li>
+        <li><i class="fas fa-check mr-2"></i>To create an App Password: Google Account > Security > App Passwords</li>
+    </ul>
+</div>
+{% endblock %}

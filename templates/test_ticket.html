@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Create Test Ticket - InfinityWork Support Desk{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Test Ticket</h1>
+    <p class="text-gray-600">Manually create a ticket to test the AI processing workflow</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6 max-w-2xl">
+    <form action="/test-ticket" method="POST">
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sender Email</label>
+                <input type="email" name="sender_email" 
+                    placeholder="customer@example.com"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+                <input type="text" name="subject" 
+                    placeholder="Cannot login to my account"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email Body</label>
+                <textarea name="body" rows="8" 
+                    placeholder="Describe the support issue here..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required></textarea>
+            </div>
+            
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition w-full">
+                <i class="fas fa-paper-plane mr-2"></i>Create Ticket & Analyze with AI
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl">
+    <h3 class="text-lg font-semibold text-blue-800 mb-3">
+        <i class="fas fa-info-circle mr-2"></i>Example Test Scenarios
+    </h3>
+    <div class="space-y-4 text-sm text-blue-700">
+        <div class="bg-white rounded p-4">
+            <strong>Billing Issue:</strong>
+            <p class="mt-1">Subject: "Incorrect charge on my account"<br>
+            Body: "Hi, I noticed I was charged R500 twice this month for my subscription. Please investigate and refund the duplicate charge. My account email is john@example.com"</p>
+        </div>
+        <div class="bg-white rounded p-4">
+            <strong>Technical Issue:</strong>
+            <p class="mt-1">Subject: "Software crashes when opening files"<br>
+            Body: "The application keeps crashing whenever I try to open large Excel files. I'm using Windows 11 and have 16GB RAM. The error message says 'Out of memory exception'. Please help!"</p>
+        </div>
+        <div class="bg-white rounded p-4">
+            <strong>Login Issue:</strong>
+            <p class="mt-1">Subject: "Cannot access my account"<br>
+            Body: "I've tried resetting my password multiple times but I still can't log in. The system says my credentials are invalid. My username is john.smith and I need urgent access for a project deadline."</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
