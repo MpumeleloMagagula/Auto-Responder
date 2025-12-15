@@ -99,3 +99,15 @@ class EmailConfig(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class SchedulerConfig(Base):
+    __tablename__ = "scheduler_config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    auto_fetch_enabled = Column(Boolean, default=False)
+    fetch_interval_minutes = Column(Integer, default=5)
+    last_fetch_at = Column(DateTime(timezone=True), nullable=True)
+    last_fetch_count = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -7,15 +8,28 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from database import engine, get_db, Base
-from models import Ticket, EmailConfig, TicketStatus
+from database import engine, get_db, Base, SessionLocal
+from models import Ticket, EmailConfig, TicketStatus, SchedulerConfig
 from email_ingestor import fetch_and_process_emails, create_test_ticket
 from mail_sender import send_approved_ticket_async, send_all_approved_tickets_async
 from ai_processor import analyze_email
+from scheduler import start_scheduler, stop_scheduler, update_scheduler_job, scheduler
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="InfinityWork Support Desk")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = SessionLocal()
+    try:
+        start_scheduler(db)
+    finally:
+        db.close()
+    yield
+    stop_scheduler()
+
+
+app = FastAPI(title="InfinityWork Support Desk", lifespan=lifespan)
 
 os.makedirs("static", exist_ok=True)
 os.makedirs("templates", exist_ok=True)
@@ -116,9 +130,16 @@ async def send_ticket_response(ticket_id: str, db: Session = Depends(get_db)):
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request, db: Session = Depends(get_db)):
     config = db.query(EmailConfig).filter(EmailConfig.is_active == True).first()
+    scheduler_config = db.query(SchedulerConfig).first()
+    if not scheduler_config:
+        scheduler_config = SchedulerConfig(auto_fetch_enabled=False, fetch_interval_minutes=5)
+        db.add(scheduler_config)
+        db.commit()
+        db.refresh(scheduler_config)
     return templates.TemplateResponse("settings.html", {
         "request": request,
-        "config": config
+        "config": config,
+        "scheduler_config": scheduler_config
     })
 
 
@@ -165,6 +186,36 @@ async def save_email_settings(
         db.add(config)
     
     db.commit()
+    return RedirectResponse(url="/settings", status_code=303)
+
+
+@app.post("/settings/scheduler")
+async def save_scheduler_settings(
+    auto_fetch_enabled: bool = Form(default=False),
+    fetch_interval_minutes: int = Form(default=5),
+    db: Session = Depends(get_db)
+):
+    existing = db.query(SchedulerConfig).first()
+    
+    if existing:
+        existing.auto_fetch_enabled = auto_fetch_enabled
+        existing.fetch_interval_minutes = fetch_interval_minutes
+    else:
+        config = SchedulerConfig(
+            auto_fetch_enabled=auto_fetch_enabled,
+            fetch_interval_minutes=fetch_interval_minutes
+        )
+        db.add(config)
+    
+    db.commit()
+    
+    if auto_fetch_enabled:
+        update_scheduler_job(fetch_interval_minutes)
+    else:
+        job = scheduler.get_job("auto_fetch_emails")
+        if job:
+            scheduler.remove_job("auto_fetch_emails")
+    
     return RedirectResponse(url="/settings", status_code=303)
 
 
